@@ -9,13 +9,13 @@ uart_out = machine.UART(2, baudrate=38400)  # Ajusta los pines según tu configu
 
 # Función para recibir, procesar y retransmitir un mensaje completo
 def process_and_transmit():
-    received_message = uart_in.readline()  # Leer el mensaje completo
+    received_message = str(uart_in.readline())  # Leer el mensaje completo            
 
     if received_message:  # Verificar si se recibió algún mensaje
         print("Mensaje recibido:", received_message)
         
         # Dividir el mensaje en partes utilizando el espacio como separador
-        message_parts = received_message.split()
+        message_parts = received_message.split(',')
         
         # Verificar si hay suficientes partes en el mensaje
         if len(message_parts) >= 20:
