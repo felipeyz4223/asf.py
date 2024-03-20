@@ -21,10 +21,11 @@ while True:
         # Imprimir el mensaje recibido en la consola
         print("Mensaje recibido:", received_data)
         
-        # Dividir la palabra en tres secciones
+        # Dividir la palabra en cuatro secciones
         section1 = received_data[:4]
         section2 = received_data[4:16]
-        section3 = received_data[16:]
+        section3 = received_data[16:336]
+        section4 = received_data[336:]
         
         # Verificar el valor del primer arreglo
         if section1 == b'\x5A\x5A\x01\x4C':
