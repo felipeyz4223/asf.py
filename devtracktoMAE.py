@@ -11,8 +11,8 @@ uart2.init(baudrate=38400, bits=8, parity=None, stop=1, timeout=261, flow=0, tim
 def parseRowTrack(row_track):
     trackDict = {}
     track_num = row_track[3]
-    track_valido = row_track[17:20]
-    ieee754_value = row_track[17:20]  # might not work, so maybe  row_track[17:20]
+    track_valido = row_track[16:19]
+    ieee754_value = row_track[16:19]  # might not work, so maybe  row_track[17:20]
     trackDict["track_valido"] = track_valido 
     trackDict["ieee754_value"] = ieee754_value
     print(track_num , " :: ", trackDict )
@@ -39,16 +39,19 @@ def prepareTxMsg( all_tracks):
     for trackNum in sorted(all_tracks.keys()):
 
         trackNum_str= bytearray()   
-        trackNum_str = trackNum.decode('ascii', 'ignore')
+        #trackNum_str= trackNum.decode('ascii', 'ignore')
+
+        trackNum_str = str(trackNum)  # Convertir el número de pista a una cadena
+        msgArr.append(trackNum_str)
         #necesitas hacer un limpiador del  trackNum que llega en byteArray
-        msgArr.append(str(trackNum_str) )
+        #msgArr.append(str(trackNum_str) )
         
         ## necesitas hacer un conversor de ieee754 --> BCD
         bcd_value = all_tracks[trackNum]["ieee754_value"]
         print("track encontrado", bcd_value)
         
         msgArr.append( str(bcd_value) )
-        
+
     msgStr = ",".join(msgArr)
     return msgStr
 
