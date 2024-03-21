@@ -33,27 +33,6 @@ def parseRows(last_section):
 
     return all_tracks
 
-def prepareTxArr(all_tracks):
-    msgArr = []
-    for trackNum in all_tracks.keys():
-        
-         # Vaciar las variables locales
-        trackNum_str = ""
-        bcd_value = ""
-        msb_values = ""
-        lsb_values = ""
-        trackNum_str = (trackNum)  # Convertir el número de pista a una cadena
-        print("Número de pista:", trackNum_str)  # Imprimir el número de pista
-        msgArr.append([trackNum_str])
-        
-        bcd_value = all_tracks[trackNum]["ieee754_value"]
-        print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
-        msb_values, lsb_values = comparar_valores( all_tracks[trackNum]["ieee754_value"] )
-        msgArr.append([msb_values,lsb_values])
-        #msgArr.append(str(bcd_value))
-
-    return msgArr
-
 def prepareTxArr(sensorNum, all_tracks):
     msgArr = []
     msgArr.append(sensorNum)
