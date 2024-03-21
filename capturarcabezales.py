@@ -42,7 +42,11 @@ while True:
                 section4 = first_339_data[336:]
                 
                 # Procesar las secciones del mensaje restante
-                # ...
+                print(all_tracks)
+                #transmit_message(section2)
+                msgTx = "$" +  prepareTxMsg(all_tracks) + "*"
+                print("mensaje para TX ::::  ",  msgTx )
+                transmit_message( msgTx )
                 
                 # Actualizar los datos restantes
                 remaining_data = remaining_data[339:]
