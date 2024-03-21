@@ -1,4 +1,6 @@
 import pyb
+
+from comparar_valores import *
 # Configurar la velocidad de trabajo del microcontrolador a 100 MHz
 pyb.freq(100000000)
 # Configurar UART2 para recepción y transmisión a 38400 baudios
@@ -40,11 +42,15 @@ def prepareTxArr(all_tracks):
 
         bcd_value = all_tracks[trackNum]["ieee754_value"]
         print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
-        msgArr.append(str(bcd_value))
+        msb_values, lsb_values = comparar_valores( all_tracks[trackNum]["ieee754_value"] )
+        msgArr.append(str(msb_values) + str(lsb_values))
+        #msgArr.append(str(bcd_value))
 
         # Vaciar las variables locales
         trackNum_str = None
         bcd_value = None
+        msb_values = None
+        lsb_values = None
     return msgArr
 
 def prepareTxMsg(all_tracks):
