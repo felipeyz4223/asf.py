@@ -54,8 +54,10 @@ def prepareTxArr(all_tracks):
 
     return msgArr
 
-def prepareTxArr(all_tracks):
+def prepareTxArr(sensorNum, all_tracks):
     msgArr = []
+    msgArr.append(sensorNum)
+    
     for trackNum in all_tracks.keys():
         
          # Vaciar las variables locales
@@ -138,7 +140,7 @@ while True:
                 # Transmitir solo la sección 3
                 sensorNumber = parseSensorNumber(section2)
                 
-                all_tracks = all_tracks + prepareTxArr(parseRows(section3))
+                all_tracks = all_tracks + prepareTxArr(sensorNumber, parseRows(section3))
             else:
                 # Transmitir toda la palabra recibida
                 transmit_message(received_message)
@@ -152,6 +154,6 @@ while True:
         # Transmitir los datos procesados (si es necesario)
         if all_tracks:
             # Realizar la transmisión de los datos procesados
-            msgTx = "$" + prepareArrForTxMsg(all_tracks) +"," + str(sensorNumber)+ "*"
+            msgTx = "$" + prepareArrForTxMsg(all_tracks) + "*"
             print("mensaje para TX ::::  ",  msgTx )
             transmit_message(msgTx)
