@@ -41,12 +41,10 @@ while True:
                 section3 = first_339_data[16:336]
                 section4 = first_339_data[336:]
                 
-                # Procesar las secciones del mensaje restante
-                print(all_tracks)
-                #transmit_message(section2)
-                msgTx = "$" +  prepareTxMsg(all_tracks) + "*"
-                print("mensaje para TX ::::  ",  msgTx )
-                transmit_message( msgTx )
+                if section1 == b'\x5A\x5A\x01\x4C':
+                    # Transmitir solo la sección 2
+                    
+                    all_tracks = parseRows(section3)
                 
                 # Actualizar los datos restantes
                 remaining_data = remaining_data[339:]
