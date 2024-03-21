@@ -1,7 +1,9 @@
-def comparar_valores(ieee754_values = b'0000'):
+def comparar_valores(ieee754_values = b'\x00\x00\x00\x00'):
     # Inicializar listas para almacenar los resultados
     msb_values = []
     lsb_values = []
+    
+    print(ieee754_values)
     
     # Iterar sobre cada valor en la secuencia de arreglos
     #for value in ieee754_values:
