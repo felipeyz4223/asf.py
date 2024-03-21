@@ -85,7 +85,7 @@ while True:
         # Verificar el valor del primer arreglo
         if section1 == b'\x5A\x5A\x01\x4C':
             # Transmitir solo la sección 2
-            all_tracks = parseRows(section3)
+            
             all_tracks = all_tracks + prepareTxArr(parseRows(section3))
         else:
             # Transmitir toda la palabra recibida
@@ -106,7 +106,7 @@ while True:
             # Procesar las secciones del mensaje restante
             if section1 == b'\x5A\x5A\x01\x4C':
                 # Transmitir solo la sección 2
-                all_tracks = parseRows(section3)
+                
                 all_tracks = all_tracks + prepareTxArr(parseRows(section3))
             else:
                 # Transmitir toda la palabra recibida
