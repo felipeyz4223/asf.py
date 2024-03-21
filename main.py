@@ -80,26 +80,9 @@ while True:
     if received_message:
         # Imprimir el mensaje recibido en la consola
         print("Mensaje recibido:", received_message)
-        # Separar los primeros 339 datos del mensaje
-        first_339_data = received_message[:339]
-        
-        # Dividir la palabra en cuatro secciones
-        section1 = first_339_data[:4]
-        section2 = first_339_data[4:16]
-        section3 = first_339_data[16:336]
-        section4 = first_339_data[336:]
-        
-        # Procesar las secciones del primer mensaje
-        # Verificar el valor del primer arreglo
-        if section1 == b'\x5A\x5A\x01\x4C':
-            # Transmitir solo la sección 3
-            all_tracks = all_tracks + prepareTxArr(parseRows(section3))
-        else:
-            # Transmitir toda la palabra recibida
-            transmit_message(received_message)
-        
+
         # Si quedan datos en el mensaje, procesarlos
-        remaining_data = received_message[339:]
+        remaining_data = received_message[:]
         while remaining_data:
             # Separar los primeros 339 datos del mensaje restante
             first_339_data = remaining_data[:339]
@@ -120,6 +103,9 @@ while True:
             
             # Actualizar los datos restantes
             remaining_data = remaining_data[339:]
+            # prevent while loop from infinite loops
+            if( len(remaining_data) < 339 ):
+                break
         
         # Transmitir los datos procesados (si es necesario)
         if all_tracks:
