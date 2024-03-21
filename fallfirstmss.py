@@ -39,19 +39,20 @@ def prepareTxArr(all_tracks_arr):
         print("Número de pista:", trackNum)  # Imprimir el número de pista
         
         msgArr.append( str(trackNum[0]) )
-        msgArr.append( str(trackNum[1]) )# Convertir el número de pista a una cadena
+        msgArr.append( str(trackNum[1]) )
 
         bcd_value = all_tracks_arr[trackNum]["ieee754_value"]
         print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
         msb_values, lsb_values = comparar_valores( all_tracks_arr[trackNum]["ieee754_value"] )
         msgArr.append(str(msb_values) + str(lsb_values))
-        #msgArr.append(str(bcd_value))
 
         # Vaciar las variables locales
         trackNum_str = None
         bcd_value = None
         msb_values = None
         lsb_values = None
+    
+    print(msgArr)
     return msgArr
 
 def prepareTxMsg( all_tracks_dict ):
