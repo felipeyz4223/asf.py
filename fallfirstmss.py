@@ -36,9 +36,10 @@ def parseRows(cabezalId, last_section):
 def prepareTxArr(all_tracks_arr):
     msgArr = []
     for trackNum in all_tracks_arr.keys():
-        trackNum_str = str(trackNum)  # Convertir el número de pista a una cadena
-        print("Número de pista:", trackNum_str)  # Imprimir el número de pista
-        msgArr.append(trackNum_str)
+        print("Número de pista:", trackNum)  # Imprimir el número de pista
+        
+        msgArr.append( str(trackNum[0]) )
+        msgArr.append( str(trackNum[1]) )# Convertir el número de pista a una cadena
 
         bcd_value = all_tracks_arr[trackNum]["ieee754_value"]
         print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
