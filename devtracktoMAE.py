@@ -5,7 +5,7 @@ pyb.freq(100000000)
 
 # Configurar UART2 para recepción y transmisión a 38400 baudios
 uart2 = pyb.UART(2, 38400)
-uart2.init(baudrate=38400, bits=8, parity=None, stop=1, timeout=261, flow=0, timeout_char=261, read_buf_len=339)
+uart2.init(baudrate=38400, bits=8, parity=None, stop=1, timeout=261, flow=0, timeout_char=261)
 
 #from a single row, cut out the important info, return num & dict
 def parseRowTrack(row_track):
@@ -33,28 +33,23 @@ def parseRows(last_section):
     
     return all_tracks
 
-def prepareTxMsg( all_tracks):
-    
+def prepareTxMsg(all_tracks):
     msgArr = []
     for trackNum in sorted(all_tracks.keys()):
-
-        trackNum_str= bytearray()   
-        #trackNum_str= trackNum.decode('ascii', 'ignore')
-
         trackNum_str = str(trackNum)  # Convertir el número de pista a una cadena
+        print("Número de pista:", trackNum_str)  # Imprimir el número de pista
         msgArr.append(trackNum_str)
-        #necesitas hacer un limpiador del  trackNum que llega en byteArray
-        #msgArr.append(str(trackNum_str) )
-        
-        ## necesitas hacer un conversor de ieee754 --> BCD
+
         bcd_value = all_tracks[trackNum]["ieee754_value"]
-        print("track encontrado", bcd_value)
-        
-        msgArr.append( str(bcd_value) )
+        print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
+        msgArr.append(str(bcd_value))
+
+        # Vaciar las variables locales
+        trackNum_str = None
+        bcd_value = None
 
     msgStr = ",".join(msgArr)
     return msgStr
-
 
 # Función para transmitir un mensaje por UART2
 def transmit_message(message):
@@ -63,29 +58,57 @@ def transmit_message(message):
 # Bucle principal
 while True:
     # Leer mensaje de UART2
-    received_data = uart2.readline()
+    received_message = uart2.readline()
     
     # Verificar si se recibió algún dato
-    if received_data:
+    if received_message:
         # Imprimir el mensaje recibido en la consola
-        print("Mensaje recibido:", received_data)
+        print("Mensaje recibido:", received_message)
+
+        # Separar los primeros 339 datos del mensaje
+        first_339_data = received_message[:339]
         
         # Dividir la palabra en cuatro secciones
-        section1 = received_data[:4]
-        section2 = received_data[4:16]
-        section3 = received_data[16:336]
-        section4 = received_data[336:]
+        section1 = first_339_data[:4]
+        section2 = first_339_data[4:16]
+        section3 = first_339_data[16:336]
+        section4 = first_339_data[336:]
         
+        # Procesar las secciones del primer mensaje
         # Verificar el valor del primer arreglo
         if section1 == b'\x5A\x5A\x01\x4C':
             # Transmitir solo la sección 2
-            all_tracks = {}
             all_tracks = parseRows(section3)
-            print(all_tracks)
-            #transmit_message(section2)
-            msgTx = "$" +  prepareTxMsg(all_tracks) + "*"
-            print("mensaje para TX ::::  ",  msgTx )
-            transmit_message( msgTx )
         else:
             # Transmitir toda la palabra recibida
-            transmit_message(received_data)
+            transmit_message(received_message)
+        
+        # Si quedan datos en el mensaje, procesarlos
+        remaining_data = received_message[339:]
+        while remaining_data:
+            # Separar los primeros 339 datos del mensaje restante
+            first_339_data = remaining_data[:339]
+            
+            # Dividir la palabra en cuatro secciones
+            section1 = first_339_data[:4]
+            section2 = first_339_data[4:16]
+            section3 = first_339_data[16:336]
+            section4 = first_339_data[336:]
+            
+            # Procesar las secciones del mensaje restante
+            if section1 == b'\x5A\x5A\x01\x4C':
+                # Transmitir solo la sección 2
+                all_tracks = parseRows(section3)
+            else:
+                # Transmitir toda la palabra recibida
+                transmit_message(received_message)
+            
+            # Actualizar los datos restantes
+            remaining_data = remaining_data[339:]
+        
+        # Transmitir los datos procesados (si es necesario)
+        if all_tracks:
+            # Realizar la transmisión de los datos procesados
+            msgTx = "$" + prepareTxMsg(all_tracks) + "*"
+            print("mensaje para TX ::::  ",  msgTx )
+            transmit_message(msgTx)
