@@ -33,6 +33,22 @@ def parseRows(last_section):
     
     return all_tracks
 
+def prepareTxArr(all_tracks):
+    msgArr = []
+    for trackNum in all_tracks.keys():
+        trackNum_str = str(trackNum)  # Convertir el número de pista a una cadena
+        print("Número de pista:", trackNum_str)  # Imprimir el número de pista
+        msgArr.append(trackNum_str)
+
+        bcd_value = all_tracks[trackNum]["ieee754_value"]
+        print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
+        msgArr.append(str(bcd_value))
+
+        # Vaciar las variables locales
+        trackNum_str = None
+        bcd_value = None
+    return msgArr
+
 def prepareTxMsg(all_tracks):
     msgArr = []
     for trackNum in sorted(all_tracks.keys()):
@@ -59,7 +75,7 @@ def transmit_message(message):
 while True:
     # Leer mensaje de UART2
     received_message = uart2.readline()
-    
+    all_tracks = []
     # Verificar si se recibió algún dato
     if received_message:
         # Imprimir el mensaje recibido en la consola
@@ -78,7 +94,7 @@ while True:
         # Verificar el valor del primer arreglo
         if section1 == b'\x5A\x5A\x01\x4C':
             # Transmitir solo la sección 2
-            all_tracks = parseRows(section3)
+            all_tracks = all_tracks + prepareTxArr(parseRows(section3))
         else:
             # Transmitir toda la palabra recibida
             transmit_message(received_message)
@@ -98,7 +114,7 @@ while True:
             # Procesar las secciones del mensaje restante
             if section1 == b'\x5A\x5A\x01\x4C':
                 # Transmitir solo la sección 2
-                all_tracks = parseRows(section3)
+                all_tracks = all_tracks + prepareTxArr(parseRows(section3))
             else:
                 # Transmitir toda la palabra recibida
                 transmit_message(received_message)
