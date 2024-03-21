@@ -19,30 +19,30 @@ def parseRowTrack(row_track):
     return track_num , trackDict
 
 #parse all rows, return Dictionary of each track as key
-def parseRows(last_section):
+def parseRows(cabezalId, last_section):
     #0 .. 15
     all_tracks = {}
     for i in range(16):
         track_num = ""
         trackDict = {}
         track_num , trackDict = parseRowTrack( last_section[i*20 : (i+1)*20] )
-        all_tracks[track_num] = trackDict
+        all_tracks[ (cabezalId , track_num) ] = trackDict
         
     if(last_section[16*20 + 1:] == b'\xA5\xA5' ):
         print("message_ends")
 
     return all_tracks
 
-def prepareTxArr(all_tracks):
+def prepareTxArr(all_tracks_arr):
     msgArr = []
-    for trackNum in all_tracks.keys():
+    for trackNum in all_tracks_arr.keys():
         trackNum_str = str(trackNum)  # Convertir el número de pista a una cadena
         print("Número de pista:", trackNum_str)  # Imprimir el número de pista
         msgArr.append(trackNum_str)
 
-        bcd_value = all_tracks[trackNum]["ieee754_value"]
+        bcd_value = all_tracks_arr[trackNum]["ieee754_value"]
         print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
-        msb_values, lsb_values = comparar_valores( all_tracks[trackNum]["ieee754_value"] )
+        msb_values, lsb_values = comparar_valores( all_tracks_arr[trackNum]["ieee754_value"] )
         msgArr.append(str(msb_values) + str(lsb_values))
         #msgArr.append(str(bcd_value))
 
@@ -53,18 +53,21 @@ def prepareTxArr(all_tracks):
         lsb_values = None
     return msgArr
 
-def prepareTxMsg(all_tracks):
+def prepareTxMsg( all_tracks_dict ):
     msgArr = []
-    for trackNum in sorted(all_tracks.keys()):
-        trackNum_str = str(trackNum)  # Convertir el número de pista a una cadena
-        print("Número de pista:", trackNum_str)  # Imprimir el número de pista
-        msgArr.append(trackNum_str)
-        bcd_value = all_tracks[trackNum]["ieee754_value"]
-        print("Valor IEEE754 encontrado:", bcd_value)  # Imprimir el valor IEEE754
-        msgArr.append(str(bcd_value))
+    for trackId in sorted(all_tracks_dict.keys()):
+        trackId_str = str(trackId)  # Convertir el número de pista a una cadena
+        print("Número de pista:", trackId_str)  # Imprimir el número de pista
+        
+        msgArr.append(trackId_str)
+        
+        msb_values, lsb_values = comparar_valores( all_tracks_dict[trackId]["ieee754_value"] )
+        msgArr.append(str(msb_values) + str(lsb_values))
+        
         # Vaciar las variables locales
-        trackNum_str = None
-        bcd_value = None
+        trackId_str = None
+        msb_values = None
+        lsb_values = None
     msgStr = ",".join(msgArr)
     return msgStr
 
@@ -81,7 +84,9 @@ while True:
     # Leer mensaje de UART2
     received_message = uart2.readline()
 
-    all_tracks = []
+    all_tracks = {}  # dict is cleared.  
+    #No longer using a list, since all_tracks.keys() are (cabezal_id,tracknum) ordinal pairs
+    
     # Verificar si se recibió algún dato
     if received_message:
         # Imprimir el mensaje recibido en la consola
@@ -99,10 +104,21 @@ while True:
             section3 = first_339_data[16:336]
             section4 = first_339_data[336:]
             
+            # cabezal ID == 0,1,2,3,4,5,6,7
+            # • BDT CAS	        (00)
+            # • BDT CAS ABF     (01)
+            # • LDT CAS         (02)
+            # • DEMON CAS       (03)
+            # • BDT FAS         (04)
+            # • BDT FAS ABF     (05)
+            # • LDT FAS         (06)
+            # • DEMON FAS       (07)
+            cabezal_id = first_339_data[13:17]
+            
             # Procesar las secciones del mensaje restante
             if section1 == b'\x5A\x5A\x01\x4C':
                 # Transmitir solo la sección 3
-                all_tracks = all_tracks + prepareTxArr(parseRows(section3))
+                all_tracks = parseRows(cabezal_id, section3)
             else:
                 # Transmitir toda la palabra recibida
                 transmit_message(received_message)
@@ -116,6 +132,6 @@ while True:
         # Transmitir los datos procesados (si es necesario)
         if all_tracks:
             # Realizar la transmisión de los datos procesados
-            msgTx = "$" + prepareArrForTxMsg(all_tracks) + "*"
+            msgTx = "$" + prepareTxMsg(all_tracks) + "*"
             print("mensaje para TX ::::  ",  msgTx )
             transmit_message(msgTx)
